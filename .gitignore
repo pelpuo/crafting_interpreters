@@ -1,2 +1,4 @@
 .idea
 crafting_interpreters.iml
+
+*.class
