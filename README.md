@@ -1,8 +1,7 @@
 ## Running the Project
 
 ```bash
-javac com/craftinginterpreters/lox/*.java
-java -cp . com.craftinginterpreters.lox.Lox test.lox
+javac com/craftinginterpreters/lox/*.java && java -cp . com.craftinginterpreters.lox.Lox test.lox
 ```
 
 ## Creating Expr
@@ -36,11 +35,19 @@ operator → "==" | "!=" | "<" | "<=" | ">" | ">="
 ```py
 program → declaration * EOF ;
 
-declaration → varDecl | statement ;
+declaration → varDecl | statement | funDecl ;
 
 varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
 
-statement → exprStmt | printStmt | block  | ifStmt | whileStmt | forStmt ;
+funDecl → "fun" function ;
+
+function → IDENTIFIER "(" parameters? ")" block ;
+
+parameters → IDENTIFIER ( "," IDENTIFIER )* ;
+
+statement → exprStmt | printStmt | block  | ifStmt | whileStmt | forStmt | returnStmt ;
+
+returnStmt → "return" expression? ";" ;
 
 whileStmt → "while" "(" expression ")" statement ;
 
