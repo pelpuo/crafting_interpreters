@@ -35,11 +35,17 @@ operator → "==" | "!=" | "<" | "<=" | ">" | ">="
 ```py
 program → declaration * EOF ;
 
-declaration → varDecl | statement | funDecl ;
+declaration → varDecl | statement | funDecl | classDecl;
 
 varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
 
 funDecl → "fun" function ;
+
+classDecl → "class" IDENTIFIER "{" function* "}" ;
+
+call → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+
+assignment → ( call "." )? IDENTIFIER "=" assignment | logic_or ;
 
 function → IDENTIFIER "(" parameters? ")" block ;
 
@@ -86,4 +92,4 @@ primary     → NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")" | IDENTIFIER ;
 ```
 
-## Reached Page `171`
+## Reached Page `218`

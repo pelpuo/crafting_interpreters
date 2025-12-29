@@ -1,13 +1,12 @@
 package com.craftinginterpreters.lox;
 
-import static com.craftinginterpreters.lox.TokenType.values;
-
-import java.util.List;
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+
     final Environment globals = new Environment();
     private Environment environment = globals;
     private final Map<Expr, Integer> locals = new HashMap<>();
@@ -175,13 +174,33 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Object visitLogicalExpr(Expr.Logical expr) {
         Object left = evaluate(expr.left);
         if (expr.operator.type == TokenType.OR) {
-            if (isTruthy(left))
+            if (isTruthy(left)) {
                 return left;
+            }
         } else {
-            if (!isTruthy(left))
+            if (!isTruthy(left)) {
                 return left;
+            }
         }
         return evaluate(expr.right);
+    }
+
+    @Override
+    public Object visitSetExpr(Expr.Set expr) {
+        Object object = evaluate(expr.object);
+        if (!(object instanceof LoxInstance)) {
+            throw new RuntimeError(expr.name,
+                    "Only instances have fields.");
+        }
+        Object value = evaluate(expr.value);
+        ((LoxInstance) object).set(expr.name, value);
+        return value;
+    }
+
+    // This Expression
+    @Override
+    public Object visitThisExpr(Expr.This expr) {
+        return lookUpVariable(expr.keyword, expr);
     }
 
     // Call Expression
@@ -201,12 +220,23 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         LoxCallable function = (LoxCallable) callee;
 
         if (arguments.size() != function.arity()) {
-            throw new RuntimeError(expr.paren, "Expected " +
-                    function.arity() + " arguments but got " +
-                    arguments.size() + ".");
+            throw new RuntimeError(expr.paren, "Expected "
+                    + function.arity() + " arguments but got "
+                    + arguments.size() + ".");
         }
 
         return function.call(this, arguments);
+    }
+
+    // Get Expression
+    @Override
+    public Object visitGetExpr(Expr.Get expr) {
+        Object object = evaluate(expr.object);
+        if (object instanceof LoxInstance) {
+            return ((LoxInstance) object).get(expr.name);
+        }
+        throw new RuntimeError(expr.name,
+                "Only instances have properties.");
     }
 
     // Expression Statement
@@ -242,6 +272,21 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return null;
     }
 
+    // Function
+    @Override
+    public Void visitClassStmt(Stmt.Class stmt) {
+        environment.define(stmt.name.lexeme, null);
+        Map<String, LoxFunction> methods = new HashMap<>();
+        for (Stmt.Function method : stmt.methods) {
+            LoxFunction function = new LoxFunction(method, environment, 
+                    method.name.lexeme.equals("init"));
+            methods.put(method.name.lexeme, function);
+        }
+        LoxClass klass = new LoxClass(stmt.name.lexeme, methods);
+        environment.assign(stmt.name, klass);
+        return null;
+    }
+
     // If Statement
     @Override
     public Void visitIfStmt(Stmt.If stmt) {
@@ -265,7 +310,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     // Function Statement
     @Override
     public Void visitFunctionStmt(Stmt.Function stmt) {
-        LoxFunction function = new LoxFunction(stmt, environment);
+        LoxFunction function = new LoxFunction(stmt, environment, false);
         environment.define(stmt.name.lexeme, function);
         return null;
     }
@@ -274,8 +319,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitReturnStmt(Stmt.Return stmt) {
         Object value = null;
-        if (stmt.value != null)
+        if (stmt.value != null) {
             value = evaluate(stmt.value);
+        }
         throw new Return(value);
     }
 
@@ -285,38 +331,45 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     private boolean isTruthy(Object object) {
-        if (object == null)
+        if (object == null) {
             return false;
-        if (object instanceof Boolean)
+        }
+        if (object instanceof Boolean) {
             return (boolean) object;
+        }
         return true;
     }
 
     private boolean isEqual(Object a, Object b) {
-        if (a == null && b == null)
+        if (a == null && b == null) {
             return true;
-        if (a == null)
+        }
+        if (a == null) {
             return false;
+        }
         return a.equals(b);
     }
 
     private void checkNumberOperand(Token operator, Object operand) {
-        if (operand instanceof Double)
+        if (operand instanceof Double) {
             return;
+        }
         throw new RuntimeError(operator, "Operand must be a number.");
     }
 
     private void checkNumberOperands(Token operator,
             Object left, Object right) {
-        if (left instanceof Double && right instanceof Double)
+        if (left instanceof Double && right instanceof Double) {
             return;
+        }
 
         throw new RuntimeError(operator, "Operands must be numbers.");
     }
 
     private String stringify(Object object) {
-        if (object == null)
+        if (object == null) {
             return "nil";
+        }
         if (object instanceof Double) {
             String text = object.toString();
             if (text.endsWith(".0")) {
