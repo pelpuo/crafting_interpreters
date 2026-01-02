@@ -79,6 +79,11 @@ class AstPrinter implements Expr.Visitor<String> {
         return "this";
     }
 
+    @Override
+    public String visitSuperExpr(Expr.Super expr) {
+        return parenthesize("super " + expr.method.lexeme);
+    }
+
     public static void main(String[] args) {
         Expr expression = new Expr.Binary(
                 new Expr.Unary(

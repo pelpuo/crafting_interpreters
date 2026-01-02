@@ -41,7 +41,7 @@ varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
 
 funDecl → "fun" function ;
 
-classDecl → "class" IDENTIFIER "{" function* "}" ;
+classDecl → "class" IDENTIFIER ( "<" IDENTIFIER )? "{" function* "}" ;
 
 call → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 
@@ -88,8 +88,9 @@ factor      → unary ( ( "/" | "*" ) unary )* ;
 unary       → ( "!" | "-" ) unary
                | primary;
 
-primary     → NUMBER | STRING | "true" | "false" | "nil"
-               | "(" expression ")" | IDENTIFIER ;
+primary → "true" | "false" | "nil" | "this"
+                | NUMBER | STRING | IDENTIFIER | "(" expression ")"
+                | "super" "." IDENTIFIER ;
 ```
 
 ## Reached Page `218`

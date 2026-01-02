@@ -1,6 +1,13 @@
-class Bacon {
-eat() {
-print "Crunch crunch crunch!";
+class Breakfast{
+    eat(){
+        print "Wash your heands first!";
+    }
 }
+
+class Bacon < Breakfast{
+    eat() {
+        super.eat();
+        print "Crunch crunch crunch!";
+    }
 }
 Bacon().eat(); // Prints "Crunch crunch crunch!".
