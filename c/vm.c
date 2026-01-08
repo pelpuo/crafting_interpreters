@@ -1,9 +1,9 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "vm.h"
-#include "compiler.h"
 
 VM vm;
 
@@ -34,7 +34,7 @@ static InterpretResult run() {
     double b = pop();                                                          \
     double a = pop();                                                          \
     push(a op b);                                                              \
- } while (false)
+  } while (false)
 
   for (;;) {
 #ifdef DEBUG_TRACE_EXECUTION
@@ -86,7 +86,16 @@ static InterpretResult run() {
 #undef READ_CONSTANT
 }
 
-InterpretResult interpret(const char* source) {
- compile(source);
- return INTERPRET_OK;
+InterpretResult interpret(const char *source) {
+  Chunk chunk;
+  initChunk(&chunk);
+  if (!compile(source, &chunk)) {
+    freeChunk(&chunk);
+    return INTERPRET_COMPILE_ERROR;
+  }
+  vm.chunk = &chunk;
+  vm.ip = vm.chunk->code;
+  InterpretResult result = run();
+  freeChunk(&chunk);
+  return result;
 }
