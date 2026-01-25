@@ -11,6 +11,7 @@ void initChunk(Chunk *chunk) {
   initValueArray(&chunk->constants);
 }
 
+// GROW_CAPACITY and GROW_ARRAY are assumed to be defined in memory.h
 void writeChunk(Chunk* chunk, uint8_t byte, int line) {
   if (chunk->capacity < chunk->count + 1) {
     int oldCapacity = chunk->capacity;
