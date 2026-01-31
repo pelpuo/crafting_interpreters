@@ -93,4 +93,9 @@ primary → "true" | "false" | "nil" | "this"
                 | "super" "." IDENTIFIER ;
 ```
 
+primary → "true" | "false" | "nil" | "this"
+                | NUMBER | STRING | IDENTIFIER | "(" expression ")"
+                | "super" "." IDENTIFIER ;
+```
+
 ## Reached Page `465` of the book Crafting Interpreters
